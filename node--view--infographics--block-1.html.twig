@@ -1,0 +1,16 @@
+{# If we're looking at the english node and it has a translation  #}
+{% if (node.langcode.value == 'en') and (node.hastranslation('es')) %}
+  {% set es_url = '/es/node/' ~ node.id %}
+{% endif %}
+
+{% include "@molecules/lists/media-items/media-item-full.twig" with {
+  "tag": content.field_nida_content_category,
+  "heading": label,
+  "image": content.field_thumbnail,
+  "link": url,
+  "description": content.body[0]['#text'],
+  "posted_date": content.field_date_1[0],
+  "authored_date": node.getCreatedTime|format_date('article_date'),
+  "attributes": attributes,
+  "es_link": es_url
+} %}

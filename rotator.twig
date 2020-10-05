@@ -1,0 +1,86 @@
+{#
+/**
+ * @file
+ * Theme override for a field.
+ *
+ * To override output, copy the "field.html.twig" from the templates directory
+ * to your theme's directory and customize it, just like customizing other
+ * Drupal templates such as page.html.twig or node.html.twig.
+ *
+ * Instead of overriding the theming for all fields, you can also just override
+ * theming for a subset of fields using
+ * @link themeable Theme hook suggestions. @endlink For example,
+ * here are some theme hook suggestions that can be used for a field_foo field
+ * on an article node type:
+ * - field--node--field-foo--article.html.twig
+ * - field--node--field-foo.html.twig
+ * - field--node--article.html.twig
+ * - field--field-foo.html.twig
+ * - field--text-with-summary.html.twig
+ * - field.html.twig
+ *
+ * Available variables:
+ * - attributes: HTML attributes for the containing element.
+ * - label_hidden: Whether to show the field label or not.
+ * - title_attributes: HTML attributes for the title.
+ * - label: The label for the field.
+ * - multiple: TRUE if a field can contain multiple items.
+ * - items: List of all the field items. Each item contains:
+ *   - attributes: List of HTML attributes for each item.
+ *   - content: The field item's content.
+ * - entity_type: The entity type to which the field belongs.
+ * - field_name: The name of the field.
+ * - field_type: The type of the field.
+ * - label_display: The display settings for the label.
+ *
+ * @see template_preprocess_field()
+ *
+ * This template generates the field inside the paragraph that turns into 
+ * the rotator. Could be improved in the future by avoiding double loops.
+ * field--paragraph--field-multimedia--multimedia.html.twig
+ */
+#}
+
+{{ attach_library('solstice/slick') }}
+
+{%
+  set rotator_classes = [
+    'rotator',
+    'row', 
+    'grid-3-up',
+    'l-inner-sides'
+  ]
+%}
+
+{%
+  set no_rotator_classes = [
+    'row', 
+    'grid-3-up',
+  ]
+%}
+
+{% set items_with_content = 0 %}
+
+{# We're counting how many items (cards) actually have content. 
+We must do this because the spanish nodes sometimes contain empty cards due to paragraphs
+not being fully translatable. We don't want to fire the slider JS if there are truly 
+3 or fewer cards on the page. #}
+{% for item in items %}
+  {% if item.content|render|striptags|trim %}
+    {% set items_with_content = items_with_content + 1 %}
+  {% endif %}
+{% endfor %}
+
+{% if items_with_content > 3 %}
+  <div{{ attributes.addClass(rotator_classes) }}>
+{% else %}
+  <div{{ attributes.addClass(no_rotator_classes) }}>
+{% endif %}
+  {% for item in items %}
+   {# This prevents empty cards from rendering on spanish nodes that have empty card fields
+   due to paragraphs not being fully translatable. #}
+    {% if item.content|render|striptags|trim %}
+      <div{{ item.attributes.addClass('grid-item') }}>{{ item.content }}</div>
+    {% endif %}
+  {% endfor %}
+</div>
